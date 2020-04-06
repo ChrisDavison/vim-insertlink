@@ -52,6 +52,9 @@ function! insertlink#file_from_selection_and_edit(is_visual) " {{{1
 endfunction " 
 
 function! insertlink#FirstLineFromFileAsLink(filename) "{{{1
+    if !filereadable(a:filename)
+        echom a:filename . " doesn't exist"
+    endif
     let title=trim(system('head -n1 ' . a:filename))
     let matches = matchlist(title, '#\+ \(.*\)')
     if len(l:matches) > 1
