@@ -1,0 +1,33 @@
+insertlink.txt* Insert markdown links from selection
+
+Author:  chris cavison <https://chrisdavison.github.io>
+License: Same terms as Vim itself (see |license|)
+
+INTRODUCTION                                    *insertlink*
+
+
+Create a link from selection. Optionally also go to that link.
+If you have your cursor on *|text* and call the function
+*insertlink#file_from_selection* (default binding *<leader>ml* ), you will
+make the markdown link *[text](text.md)*
+
+
+MAPS                                            *insertlink-maps*
+
+                                                *insertlink-<leader>ml*
+                                                *insertlink-v-<leader>ml*
+{visual}<leader>ml                   
+<leader>ml
+    Make a link using currently selected text
+
+
+                                                *insertlink-<leader>gml*
+                                                *insertlink-v-<leader>gml*
+{visual}<leader>gml                   
+<leader>gml           
+    Make a link using currently selected text, and go to file
+
+
+COMMANDS                                          *insertlink-commands*
+
+NO COMMANDS
