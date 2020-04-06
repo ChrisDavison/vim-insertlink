@@ -50,3 +50,20 @@ endfunction "
 function! insertlink#file_from_selection_and_edit(is_visual) " {{{1
     exec "w|edit " . insertlink#file_from_selection(a:is_visual)
 endfunction " 
+
+function! insertlink#FirstLineFromFileAsLink(filename) "{{{1
+    let title=trim(system('head -n1 ' . a:filename))
+    let matches = matchlist(title, '#\+ \(.*\)')
+    if len(l:matches) > 1
+        let l:title = l:matches[1]
+    endif
+    let filename=resolve(expand(a:filename))
+    if l:filename[0] != '.'
+        let filename = './' . a:filename
+    endif
+    let link="[" . title . "](" . a:filename . ")"
+    let lfo=&formatoptions
+    set fo-=a
+    exec "normal a" . l:link
+    let &fo=lfo
+endfunction
