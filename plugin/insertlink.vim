@@ -11,7 +11,7 @@ let g:loaded_insertlink = 1
 let s:cpo_save = &cpo
 set cpo&vim
 
-au  command! -complete=file -nargs=1 InsertLinkToNote call insertlink#FirstLineFromFileAsLink(<q-args>)
+command! -complete=file -nargs=1 InsertLinkToNote call insertlink#FirstLineFromFileAsLink(<q-args>)
 
 if !exists("g:insertlink_no_keybinds")
   au Filetype markdown,markdown.pandoc nnoremap <buffer> ml :call insertlink#file_from_selection(0)<CR>
