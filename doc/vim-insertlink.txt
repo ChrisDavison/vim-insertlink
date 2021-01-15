@@ -1,4 +1,4 @@
-insertlink.txt* Insert markdown links from selection
+*insertlink.txt* Insert markdown links from selection
 
 Author:  chris cavison <https://chrisdavison.github.io>
 License: Same terms as Vim itself (see |license|)
