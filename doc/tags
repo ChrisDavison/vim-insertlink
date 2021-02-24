@@ -1,0 +1,11 @@
+<leader>ml	vim-insertlink.txt	/*<leader>ml*
+[text](text.md)	vim-insertlink.txt	/*[text](text.md)*
+insertlink	vim-insertlink.txt	/*insertlink*
+insertlink#file_from_selection	vim-insertlink.txt	/*insertlink#file_from_selection*
+insertlink-<leader>gml	vim-insertlink.txt	/*insertlink-<leader>gml*
+insertlink-<leader>ml	vim-insertlink.txt	/*insertlink-<leader>ml*
+insertlink-commands	vim-insertlink.txt	/*insertlink-commands*
+insertlink-maps	vim-insertlink.txt	/*insertlink-maps*
+insertlink-v-<leader>gml	vim-insertlink.txt	/*insertlink-v-<leader>gml*
+insertlink-v-<leader>ml	vim-insertlink.txt	/*insertlink-v-<leader>ml*
+insertlink.txt	vim-insertlink.txt	/*insertlink.txt*

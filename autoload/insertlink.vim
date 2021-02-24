@@ -51,7 +51,7 @@ function! insertlink#file_from_selection_and_edit(is_visual) " {{{1
     exec "w|edit " . insertlink#file_from_selection(a:is_visual)
 endfunction " 
 
-function! insertlink#FirstLineFromFileAsLink(filename) "{{{1
+function! s:first_line_from_file(filename)
     if !filereadable(a:filename)
         echom a:filename . " doesn't exist"
     endif
@@ -60,13 +60,31 @@ function! insertlink#FirstLineFromFileAsLink(filename) "{{{1
     if len(l:matches) > 1
         let l:title = l:matches[1]
     endif
-    let filename=resolve(expand(a:filename))
+    return l:title
+endfunction
+
+function! insertlink#FirstLineFromFileAsLink(filename) "{{{1
+    let filename=resolve(fnamemodify(expand(a:filename), ":."))
     if l:filename[0] != '.'
-        let filename = './' . a:filename
+        let filename = './' . l:filename
     endif
-    let link="[" . title . "](" . a:filename . ")"
+    let title=<sid>first_line_from_file(a:filename)
+    let link="[" . title . "](" . l:filename . ")"
     let lfo=&formatoptions
     set fo-=a
-    exec "normal a" . l:link
+    call append(line("."), l:link)
+    let &fo=lfo
+endfunction
+
+function! insertlink#FirstLineFromFileAsListLinkBelow(filename) "{{{1
+    let title=<sid>first_line_from_file(a:filename)
+    let filename=resolve(fnamemodify(expand(a:filename), ":."))
+    if l:filename[0] != '.'
+        let filename = './' . l:filename
+    endif
+    let link="-   [" . title . "](" . l:filename . ")"
+    let lfo=&formatoptions
+    set fo-=a
+    call append(line("."), l:link)
     let &fo=lfo
 endfunction
