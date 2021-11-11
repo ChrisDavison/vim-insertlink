@@ -25,17 +25,47 @@ endfunction
 
 function! s:make_markdown_link(text, url) " {{{1
     return "[" . a:text . "](" . a:url . ")"
-endfunction " 
+endfunction "
 
+function! s:first_line_from_file(filename) abort
+    if !filereadable(a:filename)
+        echom a:filename . " doesn't exist" 
+        throw a:filename . " doesn't exist" 
+    endif
+    let title=trim(system('head -n1 ' . a:filename))
+    return substitute(l:title, "^#\\+ ", "", "")
+endfunction
+
+function! s:filename_as_relative_to_current(filename) abort "{{{1
+    let cur=getcwd()
+    let dir_of_curfile=expand("%:p:h")
+    let full=l:cur . "/" . a:filename
+    exec "cd " . l:dir_of_curfile
+    let relative=substitute(fnamemodify(a:filename, ":p"), l:cur, ".", "")
+    exec "cd " . l:cur
+    return l:relative
+endfunction
+
+function! s:link_to_file(filename) abort "{{{1
+    let rel_filename=<SID>filename_as_relative_to_current(a:filename)
+    let title=<sid>first_line_from_file(a:filename)
+    return "[" . l:title . "](" . l:rel_filename . ")"
+endfunction
+
+
+" ------------------------------------------------
+" THE MAIN FUNCTIONS THAT ARE CALLED FROM COMMANDS
+" ------------------------------------------------
 function! insertlink#file_from_selection(is_visual) " {{{1
-    let text= a:is_visual ? <sid>GetVisualSelection(1) : expand('<cword>')
+    " Turn the WORD UNDER CURSOR into a link
+    let text=a:is_visual ? <sid>GetVisualSelection(1) : expand('<cword>')
     let l:start_line = line(".")
     let l:start_col = col(".")
     let nospace = substitute(l:text, " ", "-", "g")
     let lower = tolower(nospace)
     let sanitised = substitute(lower, "[^a-zA-Z0-9\-]", "", "g")
-    let linktext="./" . sanitised . ".md"
-    let replacetext=s:make_markdown_link(l:text, linktext)
+    let filename="./" . sanitised . ".md"
+    let replacetext=s:make_markdown_link(l:text, filename)
     if a:is_visual
         let around_visual = <sid>GetBeforeAndAfterVisualSelection()
         let l:line=around_visual[0] . replacetext . around_visual[1]
@@ -44,47 +74,42 @@ function! insertlink#file_from_selection(is_visual) " {{{1
         execute "normal ciw" . l:replacetext
     end
     call cursor(l:start_line, l:start_col+1)
-    return linktext
-endfunction " 
+    return filename
+endfunction "
 
 function! insertlink#file_from_selection_and_edit(is_visual) " {{{1
+    " Turn the WORDS IN VISUAL SELECTION into a link
     exec "w|edit " . insertlink#file_from_selection(a:is_visual)
 endfunction " 
 
-function! s:first_line_from_file(filename)
-    if !filereadable(a:filename)
-        echom a:filename . " doesn't exist"
-    endif
-    let title=trim(system('head -n1 ' . a:filename))
-    let matches = matchlist(title, '#\+ \(.*\)')
-    if len(l:matches) > 1
-        let l:title = l:matches[1]
-    endif
-    return l:title
+function! s:inserttext_at_point(text) abort
+    let cur_line_num = line('.')
+    let cur_col_num = col('.')
+    let orig_line = getline('.')
+    let modified_line =
+        \ strpart(orig_line, 0, cur_col_num - 1)
+        \ . a:text
+        \ . strpart(orig_line, cur_col_num - 1)
+    " Replace the current line with the modified line.
+    call setline(cur_line_num, modified_line)
+    " Place cursor on the last character of the inserted text.
+    call setpos('.', [0, cur_line_num, cur_col_num + strlen(a:text) - 1, 0])
 endfunction
 
+
 function! insertlink#FirstLineFromFileAsLink(filename) "{{{1
-    let filename=resolve(fnamemodify(expand(a:filename), ":."))
-    if l:filename[0] != '.'
-        let filename = './' . l:filename
-    endif
-    let title=<sid>first_line_from_file(a:filename)
-    let link="[" . title . "](" . l:filename . ")"
+    let rel=<sid>link_to_file(a:filename)
     let lfo=&formatoptions
     set fo-=a
-    call append(line("."), l:link)
+    call <sid>inserttext_at_point(" " . <sid>link_to_file(a:filename))
     let &fo=lfo
 endfunction
 
+
+
 function! insertlink#FirstLineFromFileAsListLinkBelow(filename) "{{{1
-    let title=<sid>first_line_from_file(a:filename)
-    let filename=resolve(fnamemodify(expand(a:filename), ":."))
-    if l:filename[0] != '.'
-        let filename = './' . l:filename
-    endif
-    let link="-   [" . title . "](" . l:filename . ")"
     let lfo=&formatoptions
     set fo-=a
-    call append(line("."), l:link)
+    call append(line("."), "- " . <sid>link_to_file(a:filename))
     let &fo=lfo
 endfunction
