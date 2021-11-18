@@ -36,14 +36,25 @@ function! s:first_line_from_file(filename) abort
     return substitute(l:title, "^#\\+ ", "", "")
 endfunction
 
+function! s:PathRelativeToCurfile(path, curfile) abort
+    let head_of_curfile = fnamemodify(a:curfile, ':h') .. '/'
+    " the path leads to a file *inside* a subdirectory of the directory of the current file; we're done
+    if stridx(a:path, head_of_curfile) == 0
+        return substitute(a:path, head_of_curfile, '../', '')
+    endif
+    " the path leads to a file *outside*; let's move up in the hierarchy to find it
+    return '../' .. s:PathRelativeToCurfile(a:path, fnamemodify(a:curfile, ':h'))
+endfunction
+
 function! s:filename_as_relative_to_current(filename) abort "{{{1
-    let cur=getcwd()
-    let dir_of_curfile=expand("%:p:h")
-    let full=l:cur . "/" . a:filename
-    exec "cd " . l:dir_of_curfile
-    let relative=substitute(fnamemodify(a:filename, ":p"), l:cur, ".", "")
-    exec "cd " . l:cur
-    return l:relative
+    return <sid>PathRelativeToCurfile(a:filename, expand("%:p:h"))
+    " let cur=getcwd()
+    " let dir_of_curfile=expand("%:p:h")
+    " let full=l:cur . "/" . a:filename
+    " exec "cd " . l:dir_of_curfile
+    " let relative=substitute(fnamemodify(a:filename, ":p"), l:cur, ".", "")
+    " exec "cd " . l:cur
+    " return l:relative
 endfunction
 
 function! s:link_to_file(filename) abort "{{{1
@@ -105,6 +116,15 @@ function! insertlink#FirstLineFromFileAsLink(filename) "{{{1
     let &fo=lfo
 endfunction
 
+
+if exists(':FZF')
+    function! insertlink#FirstLineFromFileAsLinkFZF() abort "{{{1
+        call fzf#run(fzf#wrap({
+                    \ 'source': 'find . -iregex ".*\.md$"', 
+                    \ 'sink': function('insertlink#FirstLineFromFileAsLink')
+                    \}))
+    endfunction
+endif
 
 
 function! insertlink#FirstLineFromFileAsListLinkBelow(filename) "{{{1
